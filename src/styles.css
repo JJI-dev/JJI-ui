@@ -125,6 +125,34 @@
 .jji-pd-drawer-body h4 { font-size: 16px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.4; color: var(--_black); margin: 0; word-break: keep-all; }
 .jji-pd-drawer-body p { font-size: 12px; font-weight: 500; color: var(--_g400); margin: 0; letter-spacing: -0.02em; text-transform: uppercase; }
 
+/* Hero: cover (Blog/Article) — 색상 배경 + (카테고리) + 제목
+   --jji-pd-cover-bg        기본 배경색 (글 데이터 color가 있으면 그것)
+   --jji-pd-cover-fg        글자색 (기본: 배경 밝기로 자동)
+   --jji-pd-cover-offset    사이트 main의 상단 여백만큼 위로 당겨 헤더 뒤까지 채움 (예: 60px)
+   --jji-pd-cover-title-font 제목 폰트 */
+.jji-pd-cover {
+  position: relative;
+  background: var(--jji-pd-cover-bg, #b31b1b);
+  color: var(--jji-pd-cover-fg, var(--_black));
+  margin-top: calc(-1 * var(--jji-pd-cover-offset, 0px));
+  padding: calc(var(--_header-h) + clamp(56px, 8vw, 120px)) 0 clamp(56px, 7vw, 104px);
+  min-height: clamp(360px, 34vw, 520px);
+  display: flex; align-items: flex-end;
+  box-sizing: border-box;
+}
+.jji-pd-cover-inner { max-width: var(--_max); width: 100%; margin: 0 auto; padding: 0 var(--_px); box-sizing: border-box; }
+.jji-pd-cover-category { font-size: clamp(16px, 1.5vw, 22px); font-weight: 300; letter-spacing: -0.02em; opacity: 0.75; margin: 0 0 clamp(10px, 1.2vw, 18px); }
+.jji-pd-cover-title { font-family: var(--jji-pd-cover-title-font, inherit); font-size: clamp(34px, 3.8vw, 60px); font-weight: 700; line-height: 1.2; letter-spacing: -0.04em; margin: 0; word-break: keep-all; }
+.jji-pd-cover-meta { display: flex; gap: 10px; margin-top: clamp(32px, 5vw, 80px); font-size: 13px; opacity: 0.8; }
+.jji-pd--cover .jji-pd-wrap { padding-top: clamp(48px, 5vw, 72px); }
+.jji-pd--cover .jji-pd-bar { top: 50vh; transform: translateY(calc(-50% + 20px)); }
+.jji-pd--cover .jji-pd-bar.is-visible { transform: translateY(-50%); }
+.jji-pd--cover .jji-pd-toc { padding-top: clamp(48px, 5vw, 72px); }
+.jji-pd--cover .jji-pd-toc-title { font-size: 17px; font-weight: 500; text-transform: none; letter-spacing: -0.02em; color: var(--_black); margin-bottom: 20px; }
+.jji-pd--cover .jji-pd-toc-list { gap: 10px; }
+.jji-pd--cover .jji-pd-toc-link { font-size: 14px; line-height: 1.5; }
+.jji-pd--cover .jji-pd-content h2:first-child { margin-top: 0; }
+
 /* 목차: 본문 옆 공간이 부족하면 숨김 */
 @media (max-width: 1280px) {
   .jji-pd-toc-rail { display: none; }
@@ -144,7 +172,9 @@
     padding: 10px 24px; gap: 20px; z-index: 9999;
     transform: translateX(-50%) translateY(20px);
   }
-  .jji-pd-bar.is-visible { transform: translateX(-50%) translateY(0); }
+  .jji-pd-bar.is-visible,
+  .jji-pd--cover .jji-pd-bar.is-visible { transform: translateX(-50%) translateY(0); }
+  .jji-pd--cover .jji-pd-bar { top: auto; transform: translateX(-50%) translateY(20px); }
 }
 
 

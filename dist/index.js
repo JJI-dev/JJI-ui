@@ -32,6 +32,17 @@ var DEFAULT_LABELS = {
 };
 var REVEAL = "jji-pd-reveal";
 var CONTENT_REVEAL_TARGETS = "h1, h2, h3, h4, p, ol, ul, pre, blockquote, img, figure, table";
+function readableOn(color) {
+  const m = color?.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return void 0;
+  const hex = m[1].length === 3 ? m[1].split("").map((c) => c + c).join("") : m[1];
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum < 0.06 ? "#ffffff" : "#0a0a0a";
+}
 var ArrowLeft = () => /* @__PURE__ */ jsx("svg", { width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsx("path", { d: "M19 12H5M12 19l-7-7 7-7" }) });
 var ArrowRight = () => /* @__PURE__ */ jsx("svg", { width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsx("path", { d: "M5 12h14M12 5l7 7-7 7" }) });
 function PostDetail({
@@ -40,6 +51,7 @@ function PostDetail({
   basePath,
   children,
   hero = "inline",
+  showDate = true,
   toc: showToc = true,
   hideHeaderOnScroll = true,
   headerSelector = "header",
@@ -125,11 +137,12 @@ function PostDetail({
     const el = document.getElementById(id);
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: "smooth" });
   };
-  const date = formatDate2(post.date);
+  const date = showDate ? formatDate2(post.date) : "";
+  const cover = hero === "cover";
   const article = /* @__PURE__ */ jsxs("article", { children: [
-    post.category && /* @__PURE__ */ jsx("p", { className: `jji-pd-category ${REVEAL}`, children: post.category }),
-    /* @__PURE__ */ jsx("h1", { className: `jji-pd-title ${REVEAL}`, children: post.title }),
-    (date || metaExtra) && /* @__PURE__ */ jsxs("div", { className: `jji-pd-meta ${REVEAL}`, children: [
+    !cover && post.category && /* @__PURE__ */ jsx("p", { className: `jji-pd-category ${REVEAL}`, children: post.category }),
+    !cover && /* @__PURE__ */ jsx("h1", { className: `jji-pd-title ${REVEAL}`, children: post.title }),
+    !cover && (date || metaExtra) && /* @__PURE__ */ jsxs("div", { className: `jji-pd-meta ${REVEAL}`, children: [
       date && /* @__PURE__ */ jsx("span", { children: date }),
       date && metaExtra && /* @__PURE__ */ jsx("span", { "aria-hidden": true, children: "\xB7" }),
       metaExtra
@@ -139,10 +152,33 @@ function PostDetail({
     post.tags && post.tags.length > 0 && /* @__PURE__ */ jsx("div", { className: `jji-pd-tags ${REVEAL}`, children: post.tags.map((t) => /* @__PURE__ */ jsx("span", { className: "jji-pd-tag", children: t }, t)) }),
     backLink && /* @__PURE__ */ jsx(Link, { href: backLink.href, className: `jji-pd-back ${REVEAL}`, children: backLink.label })
   ] });
-  return /* @__PURE__ */ jsxs("div", { ref: rootRef, className: "jji-pd", children: [
+  return /* @__PURE__ */ jsxs("div", { ref: rootRef, className: cover ? "jji-pd jji-pd--cover" : "jji-pd", children: [
     /* @__PURE__ */ jsx("div", { className: "jji-pd-progress", children: /* @__PURE__ */ jsx("div", { className: "jji-pd-progress-bar", style: { width: `${progress}%` } }) }),
     /* @__PURE__ */ jsx("div", { className: `jji-pd-toast${toast.on ? " is-on" : ""}`, role: "status", children: toast.msg }),
     hero === "top" && /* @__PURE__ */ jsx("div", { className: "jji-pd-hero-top", children: post.thumbnail ? /* @__PURE__ */ jsx("img", { src: post.thumbnail, alt: post.title }) : /* @__PURE__ */ jsx("div", { className: "jji-pd-hero-placeholder" }) }),
+    cover && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "jji-pd-cover",
+        style: {
+          ...post.color ? { "--jji-pd-cover-bg": post.color } : {},
+          ...post.textColor || readableOn(post.color) ? { "--jji-pd-cover-fg": post.textColor || readableOn(post.color) } : {}
+        },
+        children: /* @__PURE__ */ jsxs("div", { className: "jji-pd-cover-inner", children: [
+          post.category && /* @__PURE__ */ jsxs("p", { className: `jji-pd-cover-category ${REVEAL}`, children: [
+            "(",
+            post.category,
+            ")"
+          ] }),
+          /* @__PURE__ */ jsx("h1", { className: `jji-pd-cover-title ${REVEAL}`, children: post.title }),
+          (date || metaExtra) && /* @__PURE__ */ jsxs("div", { className: `jji-pd-cover-meta ${REVEAL}`, children: [
+            date && /* @__PURE__ */ jsx("span", { children: date }),
+            date && metaExtra && /* @__PURE__ */ jsx("span", { "aria-hidden": true, children: "\xB7" }),
+            metaExtra
+          ] })
+        ] })
+      }
+    ),
     /* @__PURE__ */ jsx("div", { className: hero === "top" ? "jji-pd-body jji-pd-body--over-hero" : "jji-pd-body", children: /* @__PURE__ */ jsxs("div", { className: "jji-pd-wrap", children: [
       /* @__PURE__ */ jsx("aside", { className: "jji-pd-bar-rail", children: /* @__PURE__ */ jsxs("div", { className: `jji-pd-bar${showBar ? " is-visible" : ""}`, children: [
         prev ? /* @__PURE__ */ jsx(Link, { href: href(prev), className: "jji-pd-btn", "aria-label": "\uC774\uC804 \uAE00", children: /* @__PURE__ */ jsx(ArrowLeft, {}) }) : /* @__PURE__ */ jsx("button", { type: "button", className: "jji-pd-btn", disabled: true, "aria-label": "\uC774\uC804 \uAE00 \uC5C6\uC74C", children: /* @__PURE__ */ jsx(ArrowLeft, {}) }),
@@ -182,7 +218,7 @@ function PostDetail({
             /* @__PURE__ */ jsx("div", { className: "jji-pd-drawer-img", children: item.thumbnail ? /* @__PURE__ */ jsx("img", { src: item.thumbnail, alt: "" }) : null }),
             /* @__PURE__ */ jsxs("div", { className: "jji-pd-drawer-body", children: [
               /* @__PURE__ */ jsx("h4", { children: item.title }),
-              /* @__PURE__ */ jsx("p", { children: [item.category, formatDate2(item.date)].filter(Boolean).join(" \xB7 ") })
+              /* @__PURE__ */ jsx("p", { children: [item.category, showDate ? formatDate2(item.date) : ""].filter(Boolean).join(" \xB7 ") })
             ] })
           ]
         },

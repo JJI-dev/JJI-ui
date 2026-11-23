@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import Link from 'next/link'
 import { formatDate as defaultFormatDate } from './formatDate'
 
@@ -11,7 +11,9 @@ import { formatDate as defaultFormatDate } from './formatDate'
    - 오른쪽 목차 (본문 h2 기준) → 1280px 이하에선 숨김
    - 목록 서랍(Drawer)
    - 스크롤 reveal 애니메이션 (컴포넌트 자체 처리)
-   - 썸네일 위치: 'top'(Log: 화면 상단 큰 이미지) | 'inline'(Life: 본문 안) | 'none'
+   - 썸네일 위치: 'top'(Log: 화면 상단 큰 이미지) | 'inline'(Life: 본문 안)
+                 | 'cover'(Blog/Article: 색상 배경 + (카테고리) + 제목) | 'none'
+     · cover 배경색은 글 데이터의 color('#B31B1B' 등)로 지정, 글자색은 자동(밝기 기준) 또는 textColor
 
    색·폰트는 사이트의 CSS 변수를 따름 (styles.css 상단 참고)
 ────────────────────────────────────────────────────────────── */
@@ -25,6 +27,10 @@ export interface PostSummary {
   date?: string
   thumbnail?: string
   tags?: string[]
+  /** hero='cover' 배경색 (예: '#B31B1B') */
+  color?: string
+  /** hero='cover' 글자색 (기본: 배경 밝기에 따라 검정/흰색 자동) */
+  textColor?: string
 }
 
 export interface PostDetailLabels {
@@ -44,7 +50,9 @@ export interface PostDetailProps {
   /** MDX 본문 */
   children?: ReactNode
   /** 썸네일 위치 (기본 'inline') */
-  hero?: 'top' | 'inline' | 'none'
+  hero?: 'top' | 'inline' | 'cover' | 'none'
+  /** 날짜 표시 (기본 true). false여도 데이터의 date는 그대로 유지 */
+  showDate?: boolean
   /** 오른쪽 목차 표시 (기본 true) */
   toc?: boolean
   /** 스크롤 시 사이트 헤더 숨김 (기본 true) */
@@ -70,6 +78,19 @@ const DEFAULT_LABELS: Required<PostDetailLabels> = {
 const REVEAL = 'jji-pd-reveal'
 const CONTENT_REVEAL_TARGETS = 'h1, h2, h3, h4, p, ol, ul, pre, blockquote, img, figure, table'
 
+/** 배경색 위에서 읽기 좋은 글자색 (아주 어두운 배경만 흰색) */
+function readableOn(color?: string): string | undefined {
+  const m = color?.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  if (!m) return undefined
+  const hex = m[1].length === 3 ? m[1].split('').map(c => c + c).join('') : m[1]
+  const [r, g, b] = [0, 2, 4].map(i => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+  })
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  return lum < 0.06 ? '#ffffff' : '#0a0a0a'
+}
+
 const ArrowLeft = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
 )
@@ -83,6 +104,7 @@ export function PostDetail({
   basePath,
   children,
   hero = 'inline',
+  showDate = true,
   toc: showToc = true,
   hideHeaderOnScroll = true,
   headerSelector = 'header',
@@ -184,13 +206,14 @@ export function PostDetail({
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' })
   }
 
-  const date = formatDate(post.date)
+  const date = showDate ? formatDate(post.date) : ''
+  const cover = hero === 'cover'
 
   const article = (
     <article>
-      {post.category && <p className={`jji-pd-category ${REVEAL}`}>{post.category}</p>}
-      <h1 className={`jji-pd-title ${REVEAL}`}>{post.title}</h1>
-      {(date || metaExtra) && (
+      {!cover && post.category && <p className={`jji-pd-category ${REVEAL}`}>{post.category}</p>}
+      {!cover && <h1 className={`jji-pd-title ${REVEAL}`}>{post.title}</h1>}
+      {!cover && (date || metaExtra) && (
         <div className={`jji-pd-meta ${REVEAL}`}>
           {date && <span>{date}</span>}
           {date && metaExtra && <span aria-hidden>·</span>}
@@ -217,13 +240,35 @@ export function PostDetail({
   )
 
   return (
-    <div ref={rootRef} className="jji-pd">
+    <div ref={rootRef} className={cover ? 'jji-pd jji-pd--cover' : 'jji-pd'}>
       <div className="jji-pd-progress"><div className="jji-pd-progress-bar" style={{ width: `${progress}%` }} /></div>
       <div className={`jji-pd-toast${toast.on ? ' is-on' : ''}`} role="status">{toast.msg}</div>
 
       {hero === 'top' && (
         <div className="jji-pd-hero-top">
           {post.thumbnail ? <img src={post.thumbnail} alt={post.title} /> : <div className="jji-pd-hero-placeholder" />}
+        </div>
+      )}
+
+      {cover && (
+        <div
+          className="jji-pd-cover"
+          style={{
+            ...(post.color ? { '--jji-pd-cover-bg': post.color } : {}),
+            ...((post.textColor || readableOn(post.color)) ? { '--jji-pd-cover-fg': post.textColor || readableOn(post.color) } : {}),
+          } as CSSProperties}
+        >
+          <div className="jji-pd-cover-inner">
+            {post.category && <p className={`jji-pd-cover-category ${REVEAL}`}>({post.category})</p>}
+            <h1 className={`jji-pd-cover-title ${REVEAL}`}>{post.title}</h1>
+            {(date || metaExtra) && (
+              <div className={`jji-pd-cover-meta ${REVEAL}`}>
+                {date && <span>{date}</span>}
+                {date && metaExtra && <span aria-hidden>·</span>}
+                {metaExtra}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -290,7 +335,7 @@ export function PostDetail({
               <div className="jji-pd-drawer-img">{item.thumbnail ? <img src={item.thumbnail} alt="" /> : null}</div>
               <div className="jji-pd-drawer-body">
                 <h4>{item.title}</h4>
-                <p>{[item.category, formatDate(item.date)].filter(Boolean).join(' · ')}</p>
+                <p>{[item.category, showDate ? formatDate(item.date) : ''].filter(Boolean).join(' · ')}</p>
               </div>
             </Link>
           ))}

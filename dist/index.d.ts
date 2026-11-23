@@ -10,6 +10,10 @@ interface PostSummary {
     date?: string;
     thumbnail?: string;
     tags?: string[];
+    /** hero='cover' 배경색 (예: '#B31B1B') */
+    color?: string;
+    /** hero='cover' 글자색 (기본: 배경 밝기에 따라 검정/흰색 자동) */
+    textColor?: string;
 }
 interface PostDetailLabels {
     toc?: string;
@@ -27,7 +31,9 @@ interface PostDetailProps {
     /** MDX 본문 */
     children?: ReactNode;
     /** 썸네일 위치 (기본 'inline') */
-    hero?: 'top' | 'inline' | 'none';
+    hero?: 'top' | 'inline' | 'cover' | 'none';
+    /** 날짜 표시 (기본 true). false여도 데이터의 date는 그대로 유지 */
+    showDate?: boolean;
     /** 오른쪽 목차 표시 (기본 true) */
     toc?: boolean;
     /** 스크롤 시 사이트 헤더 숨김 (기본 true) */
@@ -44,7 +50,7 @@ interface PostDetailProps {
     labels?: PostDetailLabels;
     formatDate?: (raw?: string) => string;
 }
-declare function PostDetail({ post, posts, basePath, children, hero, toc: showToc, hideHeaderOnScroll, headerSelector, metaExtra, backLink, labels: labelsProp, formatDate, }: PostDetailProps): react.JSX.Element;
+declare function PostDetail({ post, posts, basePath, children, hero, showDate, toc: showToc, hideHeaderOnScroll, headerSelector, metaExtra, backLink, labels: labelsProp, formatDate, }: PostDetailProps): react.JSX.Element;
 
 interface CategoryGridProps<T> {
     /** 표시 순서대로. 첫 번째(또는 allCategory)는 '전체' */
