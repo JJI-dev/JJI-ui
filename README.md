@@ -101,7 +101,11 @@ import { CategoryGrid, GridTile, formatDate } from '@jji/ui'
 1. 이 레포에서 `src/` 수정
 2. `npm run build` → `dist/` 갱신 (**dist도 커밋**: GitHub 설치 시 빌드 없이 사용)
 3. `package.json` 버전 올리고 커밋 → 태그 (`git tag v0.1.1 && git push --tags`)
-4. 각 사이트에서 `npm install github:JJI-dev/JJI-ui#v0.1.1`
+4. 각 사이트에서 버전 교체 (npm 12는 lock에 남은 이전 git 버전 갱신을 거부하므로 제거 후 설치)
+   ```bash
+   npm uninstall @jji/ui && npm install github:JJI-dev/JJI-ui#v0.2.1
+   ```
+   각 사이트 `.npmrc`의 `allow-git=root`가 있어야 GitHub 설치가 허용됩니다.
 
 로컬에서 바로 확인하고 싶을 땐 사이트 폴더에서:
 
