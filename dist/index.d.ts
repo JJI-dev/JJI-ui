@@ -88,4 +88,27 @@ declare function GridTile({ href, thumbnail, alt, metaLeft, metaRight, badge }: 
  */
 declare function formatDate(raw?: string): string;
 
-export { CategoryGrid, type CategoryGridProps, GridTile, type GridTileProps, PostDetail, type PostDetailLabels, type PostDetailProps, type PostSummary, type TileMeta, formatDate };
+interface WorkFeedItem {
+    id: string;
+    slug: string;
+    title: string;
+    category: string;
+    year?: string;
+    client?: string;
+    summary?: string;
+    /** 절대 주소 */
+    thumbnail?: string;
+    /** 상세 페이지 절대 주소 */
+    url: string;
+    /** 준비 중(상세 없음) */
+    tbu?: boolean;
+}
+interface WorkFeed {
+    /** 'ne' | 'mo' ... */
+    site: string;
+    siteUrl: string;
+    updatedAt: string;
+    items: WorkFeedItem[];
+}
+
+export { CategoryGrid, type CategoryGridProps, GridTile, type GridTileProps, PostDetail, type PostDetailLabels, type PostDetailProps, type PostSummary, type TileMeta, type WorkFeed, type WorkFeedItem, formatDate };

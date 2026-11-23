@@ -75,6 +75,15 @@ import { CategoryGrid, GridTile, formatDate } from '@jji/ui'
 />
 ```
 
+## WorkFeed (works.json 형식)
+
+ne·mo가 `/works.json`으로 작업 목록을 내보내고, jji.kr 포트폴리오가 가져와 목록을 만듭니다.
+
+```ts
+import type { WorkFeed } from '@jji/ui'
+// { site, siteUrl, updatedAt, items: [{ id, slug, title, category, year, client, summary, thumbnail(절대주소), url(상세 절대주소), tbu }] }
+```
+
 ## 사이트별 톤 조정
 
 `styles.css`는 사이트의 CSS 변수(`--black`, `--gray-*`, `--px`, `--header-h`, `--accent`)를 그대로 따릅니다.

@@ -3,3 +3,4 @@ export type { PostDetailProps, PostSummary, PostDetailLabels } from './PostDetai
 export { CategoryGrid, GridTile } from './CategoryGrid'
 export type { CategoryGridProps, GridTileProps, TileMeta } from './CategoryGrid'
 export { formatDate } from './formatDate'
+export type { WorkFeed, WorkFeedItem } from './feed'
