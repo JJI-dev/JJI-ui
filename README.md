@@ -7,11 +7,17 @@ JJI 사이트 공통 UI 컴포넌트. 현재 사용처:
 | space-frontend | `/log/[slug]` | `hero="top"`, `toc={false}`, 조회수 |
 | space-frontend | `/life/[slug]` | `hero="inline"`, `toc`, 조회수 |
 | ne-frontend | `/blog/[slug]` | `hero="inline"`, `toc`, 목록 링크 |
+| mo-frontend | `/blog/[slug]` | `hero="inline"`, `toc`, 헤더 숨김 끔 |
+
+| 컴포넌트 | 사용처 |
+|---|---|
+| `PostDetail` | 위 표 (글 상세) |
+| `CategoryGrid` + `GridTile` | ne `/work`, ne `/blog`, mo `/blog` (목록) |
 
 ## 설치
 
 ```bash
-npm install github:JJI-dev/JJI-ui#v0.1.0
+npm install github:JJI-dev/JJI-ui#v0.2.0
 ```
 
 루트 `layout.tsx`에서 스타일을 한 번 불러옵니다 (사이트 `globals.css`보다 먼저).
@@ -42,6 +48,33 @@ import { PostDetail } from '@jji/ui'
 `children`(MDX 본문)의 제목·문단·목록·이미지 스타일과 스크롤 애니메이션은 컴포넌트가 처리합니다.
 MDX `components` 매핑은 필요 없습니다.
 
+## CategoryGrid / GridTile
+
+왼쪽 세로 카테고리 + 오른쪽 검색 + 3열 목록. 카테고리·검색은 목록 영역 안에서 sticky라 목록이 끝나면 함께 올라갑니다.
+페이지의 `<main>`에는 상단 padding을 주지 않습니다 (목록 시작 위치는 컴포넌트가 계산).
+
+```tsx
+import { CategoryGrid, GridTile, formatDate } from '@jji/ui'
+
+<CategoryGrid
+  categories={['All', 'Article', 'Study']}       // 첫 번째 = 전체
+  items={posts}
+  getKey={p => p.id}
+  matches={(p, c) => p.category === c}
+  getSearchText={p => p.title}                    // 아이콘 옆 입력창 검색
+  // onSearchClick={() => setSpotlight(true)}     // 또는 외부 검색 열기
+  renderItem={p => (
+    <GridTile
+      href={`/blog/${p.slug}`}
+      thumbnail={p.thumbnail}
+      metaLeft={[['TITLE', p.title], ['DATE', formatDate(p.date)]]}
+      metaRight={[['CATEGORY', p.category]]}
+      // badge="TBU"                                // 준비 중 표시 (클릭 불가)
+    />
+  )}
+/>
+```
+
 ## 사이트별 톤 조정
 
 `styles.css`는 사이트의 CSS 변수(`--black`, `--gray-*`, `--px`, `--header-h`, `--accent`)를 그대로 따릅니다.
@@ -54,6 +87,12 @@ MDX `components` 매핑은 필요 없습니다.
   --jji-pd-category-font: var(--font-category);
   --jji-pd-radius: 0px;                    /* 썸네일 모서리 */
   --jji-pd-max: 760px;                     /* 본문 너비 */
+}
+.jji-cg {
+  --jji-cg-font: var(--font-en);           /* 카테고리 폰트 (기본: --font-category) */
+  --jji-cg-size: 64px;                     /* 카테고리 크기 */
+  --jji-cg-grid-top: 40vh;                 /* 목록 시작 위치 */
+  --jji-tile-ratio: 3 / 4;                 /* 타일 비율 */
 }
 ```
 

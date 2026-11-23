@@ -1,6 +1,6 @@
 {
   "name": "@jji/ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JJI 사이트(ne, space) 공통 UI 컴포넌트",
   "repository": {
     "type": "git",

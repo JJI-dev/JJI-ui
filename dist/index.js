@@ -191,7 +191,137 @@ function PostDetail({
     ] })
   ] });
 }
+
+// src/CategoryGrid.tsx
+import { useEffect as useEffect2, useMemo, useRef as useRef2, useState as useState2 } from "react";
+import Link2 from "next/link";
+import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
+var SearchIcon = () => /* @__PURE__ */ jsxs2("svg", { width: "48", height: "48", viewBox: "0 0 48 48", fill: "none", "aria-hidden": true, children: [
+  /* @__PURE__ */ jsx2("circle", { cx: "21", cy: "21", r: "16", fill: "white", stroke: "currentColor", strokeWidth: "3.5" }),
+  /* @__PURE__ */ jsx2("line", { x1: "33", y1: "33", x2: "42", y2: "42", stroke: "currentColor", strokeWidth: "4.5", strokeLinecap: "round" })
+] });
+function CategoryGrid({
+  categories,
+  items,
+  getKey,
+  renderItem,
+  matches,
+  allCategory,
+  initialCategory,
+  onCategoryChange,
+  onSearchClick,
+  getSearchText,
+  searchPlaceholder = "\uAC80\uC0C9",
+  hideSearch = false,
+  emptyText = "\uD574\uB2F9 \uCE74\uD14C\uACE0\uB9AC\uC758 \uAE00\uC774 \uC5C6\uC2B5\uB2C8\uB2E4"
+}) {
+  const all = allCategory ?? categories[0];
+  const [active, setActive] = useState2(initialCategory ?? all);
+  const [searchOpen, setSearchOpen] = useState2(false);
+  const [query, setQuery] = useState2("");
+  const gridRef = useRef2(null);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter(
+      (item) => (active === all || (matches ? matches(item, active) : false)) && (!q || !getSearchText || getSearchText(item).toLowerCase().includes(q))
+    );
+  }, [items, active, all, matches, query, getSearchText]);
+  const gridKey = `${active}::${query}`;
+  useEffect2(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting || entry.boundingClientRect.bottom < 0) {
+          entry.target.classList.add("is-revealed");
+          io.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0, rootMargin: "0px 0px -8% 0px" }
+    );
+    el.querySelectorAll(".jji-cg-cell").forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, [gridKey]);
+  const select = (c) => {
+    setActive(c);
+    onCategoryChange?.(c);
+  };
+  const inlineSearch = !onSearchClick && !!getSearchText;
+  return /* @__PURE__ */ jsxs2("div", { className: "jji-cg", children: [
+    /* @__PURE__ */ jsx2("div", { className: "jji-cg-rail jji-cg-rail--left", children: /* @__PURE__ */ jsx2("nav", { className: "jji-cg-categories", "aria-label": "\uCE74\uD14C\uACE0\uB9AC", children: categories.map((c) => /* @__PURE__ */ jsx2(
+      "button",
+      {
+        type: "button",
+        className: `jji-cg-category${active === c ? " is-active" : ""}`,
+        "aria-pressed": active === c,
+        onClick: () => select(c),
+        children: c
+      },
+      c
+    )) }) }),
+    !hideSearch && (onSearchClick || inlineSearch) && /* @__PURE__ */ jsx2("div", { className: "jji-cg-rail jji-cg-rail--right", children: /* @__PURE__ */ jsxs2("div", { className: "jji-cg-search", children: [
+      inlineSearch && searchOpen && /* @__PURE__ */ jsx2(
+        "input",
+        {
+          autoFocus: true,
+          value: query,
+          onChange: (e) => setQuery(e.target.value),
+          onKeyDown: (e) => {
+            if (e.key === "Escape") {
+              setQuery("");
+              setSearchOpen(false);
+            }
+          },
+          placeholder: searchPlaceholder,
+          "aria-label": searchPlaceholder
+        }
+      ),
+      /* @__PURE__ */ jsx2(
+        "button",
+        {
+          type: "button",
+          className: "jji-cg-search-btn",
+          "aria-label": inlineSearch && searchOpen ? "\uAC80\uC0C9 \uB2EB\uAE30" : "\uAC80\uC0C9",
+          onClick: () => {
+            if (onSearchClick) return onSearchClick();
+            if (searchOpen) setQuery("");
+            setSearchOpen((o) => !o);
+          },
+          children: /* @__PURE__ */ jsx2(SearchIcon, {})
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ jsx2("div", { className: "jji-cg-spacer" }),
+    filtered.length === 0 ? /* @__PURE__ */ jsx2("div", { className: "jji-cg-empty", children: emptyText }) : /* @__PURE__ */ jsx2("div", { ref: gridRef, className: "jji-cg-grid", children: filtered.map((item, i) => /* @__PURE__ */ jsx2("div", { className: `jji-cg-cell jji-cg-delay-${i % 3 + 1}`, children: renderItem(item, i) }, getKey(item))) }, gridKey)
+  ] });
+}
+function MetaCol({ rows, align }) {
+  if (!rows?.length) return /* @__PURE__ */ jsx2("div", {});
+  return /* @__PURE__ */ jsx2("div", { className: `jji-tile-meta-col is-${align}`, children: rows.map(([label, value]) => /* @__PURE__ */ jsxs2("div", { children: [
+    /* @__PURE__ */ jsxs2("span", { className: "jji-tile-label", children: [
+      label,
+      " : "
+    ] }),
+    /* @__PURE__ */ jsx2("span", { className: "jji-tile-value", children: value ?? "-" })
+  ] }, label)) });
+}
+function GridTile({ href, thumbnail, alt = "", metaLeft, metaRight, badge }) {
+  const inner = /* @__PURE__ */ jsxs2(Fragment, { children: [
+    /* @__PURE__ */ jsx2("div", { className: "jji-tile-inner", children: thumbnail && /* @__PURE__ */ jsx2("img", { src: thumbnail, alt }) }),
+    badge && /* @__PURE__ */ jsx2("div", { className: "jji-tile-badge", children: /* @__PURE__ */ jsx2("span", { children: badge }) }),
+    /* @__PURE__ */ jsxs2("div", { className: "jji-tile-overlay", children: [
+      /* @__PURE__ */ jsx2(MetaCol, { rows: metaLeft, align: "left" }),
+      /* @__PURE__ */ jsx2(MetaCol, { rows: metaRight, align: "right" })
+    ] })
+  ] });
+  if (badge || !href) {
+    return /* @__PURE__ */ jsx2("div", { className: `jji-tile${badge ? " is-disabled" : ""}`, children: inner });
+  }
+  return /* @__PURE__ */ jsx2(Link2, { href, className: "jji-tile", children: inner });
+}
 export {
+  CategoryGrid,
+  GridTile,
   PostDetail,
   formatDate
 };

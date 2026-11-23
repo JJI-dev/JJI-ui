@@ -1,3 +1,5 @@
 export { PostDetail } from './PostDetail'
 export type { PostDetailProps, PostSummary, PostDetailLabels } from './PostDetail'
+export { CategoryGrid, GridTile } from './CategoryGrid'
+export type { CategoryGridProps, GridTileProps, TileMeta } from './CategoryGrid'
 export { formatDate } from './formatDate'

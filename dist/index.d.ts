@@ -46,10 +46,46 @@ interface PostDetailProps {
 }
 declare function PostDetail({ post, posts, basePath, children, hero, toc: showToc, hideHeaderOnScroll, headerSelector, metaExtra, backLink, labels: labelsProp, formatDate, }: PostDetailProps): react.JSX.Element;
 
+interface CategoryGridProps<T> {
+    /** 표시 순서대로. 첫 번째(또는 allCategory)는 '전체' */
+    categories: readonly string[];
+    items: T[];
+    getKey: (item: T) => string | number;
+    renderItem: (item: T, index: number) => ReactNode;
+    /** 카테고리 매칭 (기본: 전체 카테고리면 모두 통과, 아니면 통과 안 함) */
+    matches?: (item: T, category: string) => boolean;
+    /** '전체' 카테고리 이름 (기본: categories[0]) */
+    allCategory?: string;
+    initialCategory?: string;
+    onCategoryChange?: (category: string) => void;
+    /** 검색 버튼 클릭 시 외부 검색 열기 (예: SpotlightSearch) */
+    onSearchClick?: () => void;
+    /** onSearchClick이 없을 때: 아이콘 옆 입력창으로 목록 필터 */
+    getSearchText?: (item: T) => string;
+    searchPlaceholder?: string;
+    /** 검색 버튼 숨김 */
+    hideSearch?: boolean;
+    emptyText?: ReactNode;
+}
+declare function CategoryGrid<T>({ categories, items, getKey, renderItem, matches, allCategory, initialCategory, onCategoryChange, onSearchClick, getSearchText, searchPlaceholder, hideSearch, emptyText, }: CategoryGridProps<T>): react.JSX.Element;
+type TileMeta = [label: string, value: ReactNode];
+interface GridTileProps {
+    href?: string;
+    thumbnail?: string;
+    alt?: string;
+    /** 왼쪽 정보 (예: TITLE, YEAR) */
+    metaLeft?: TileMeta[];
+    /** 오른쪽 정보 (예: CATEGORY, CLIENT) */
+    metaRight?: TileMeta[];
+    /** 가운데 배지 (예: 'TBU') — 지정 시 클릭 불가 */
+    badge?: string;
+}
+declare function GridTile({ href, thumbnail, alt, metaLeft, metaRight, badge }: GridTileProps): react.JSX.Element;
+
 /**
  * 날짜 문자열을 'YYYY.MM.DD' 형식으로 변환
  * 입력: '2025-12-01' | '2026. 3. 23.' | '2026.04.23' 등 (space-frontend formatDate 기준)
  */
 declare function formatDate(raw?: string): string;
 
-export { PostDetail, type PostDetailLabels, type PostDetailProps, type PostSummary, formatDate };
+export { CategoryGrid, type CategoryGridProps, GridTile, type GridTileProps, PostDetail, type PostDetailLabels, type PostDetailProps, type PostSummary, type TileMeta, formatDate };
