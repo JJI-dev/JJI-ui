@@ -54,10 +54,27 @@ if (/[^\x00-\x7F]/.test(cwd) && env.WATCHPACK_POLLING === undefined) {
   console.log(`${'\x1b[35m[jji-dev]\x1b[0m'} 경로에 비ASCII 문자 → 파일 감시 폴링 모드 (WATCHPACK_POLLING=true)`)
 }
 
+const isWin = process.platform === 'win32'
+// next dev는 실제 서버를 자식 프로세스로 따로 띄움 → 프로세스 그룹 전체를 종료해야 포트가 풀림
+const killTree = sig => {
+  if (!child?.pid) return
+  try { isWin ? child.kill(sig) : process.kill(-child.pid, sig) } catch {}
+}
+
+let retries = 0
+let startedAt = 0
 const start = () => {
-  child = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env, shell: process.platform === 'win32' })
+  startedAt = Date.now()
+  child = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env, shell: isWin, detached: !isWin })
   child.on('exit', code => {
     if (restarting) return
+    // 재시작 직후 실패(이전 서버가 포트를 아직 안 놓음 등) → 잠시 후 재시도
+    if (code && retries > 0 && Date.now() - startedAt < 15000) {
+      retries--
+      console.log(`\n${tag} 시작 실패 → 잠시 후 다시 시도\n`)
+      setTimeout(start, 1500)
+      return
+    }
     process.exit(code ?? 0)
   })
 }
@@ -66,9 +83,13 @@ const restart = reason => {
   if (!child) return start()
   restarting = true
   console.log(`\n${tag} ${reason} → dev 서버 재시작\n`)
-  child.once('exit', () => { restarting = false; start() })
-  child.kill('SIGTERM')
-  setTimeout(() => { if (restarting) child.kill('SIGKILL') }, 5000)
+  const prev = child
+  prev.once('exit', () => {
+    // 손자 프로세스가 포트를 놓을 시간을 잠깐 줌
+    setTimeout(() => { restarting = false; retries = 3; start() }, 800)
+  })
+  killTree('SIGTERM')
+  setTimeout(() => { if (restarting && child === prev) killTree('SIGKILL') }, 5000)
 }
 
 let last = signature()
@@ -87,7 +108,7 @@ setInterval(() => {
 }, 1000)
 
 for (const sig of ['SIGINT', 'SIGTERM']) {
-  process.on(sig, () => { restarting = true; child?.kill(sig); process.exit(0) })
+  process.on(sig, () => { restarting = true; killTree(sig); process.exit(0) })
 }
 
 console.log(`${tag} 자동 재시작 감시 중 (@jji/ui, package.json, .env, next.config)`)
