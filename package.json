@@ -1,7 +1,7 @@
 {
   "name": "@jji/ui",
-  "version": "0.2.0",
-  "description": "JJI 사이트(ne, space) 공통 UI 컴포넌트",
+  "version": "0.3.0",
+  "description": "JJI 사이트(ne, mo, space) 공통 UI 컴포넌트 + 개발 도구",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JJI-dev/JJI-ui.git"
@@ -10,6 +10,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "jji-dev": "./bin/jji-dev.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -18,14 +21,16 @@
     "./styles.css": "./dist/styles.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "sideEffects": [
     "*.css"
   ],
   "scripts": {
     "build": "tsup && cp src/styles.css dist/styles.css",
-    "dev": "tsup --watch",
+    "sync": "npm run build && node scripts/sync.mjs",
+    "dev": "tsup --watch --onSuccess \"cp src/styles.css dist/styles.css && node scripts/sync.mjs\"",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {

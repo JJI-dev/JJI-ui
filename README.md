@@ -96,21 +96,34 @@ import { CategoryGrid, GridTile, formatDate } from '@jji/ui'
 }
 ```
 
-## 수정 → 배포 흐름
+## 개발 도구: jji-dev (dev 서버 자동 재시작)
 
-1. 이 레포에서 `src/` 수정
-2. `npm run build` → `dist/` 갱신 (**dist도 커밋**: GitHub 설치 시 빌드 없이 사용)
-3. `package.json` 버전 올리고 커밋 → 태그 (`git tag v0.1.1 && git push --tags`)
-4. 각 사이트에서 버전 교체 (npm 12는 lock에 남은 이전 git 버전 갱신을 거부하므로 제거 후 설치)
-   ```bash
-   npm uninstall @jji/ui && npm install github:JJI-dev/JJI-ui#v0.2.1
-   ```
-   각 사이트 `.npmrc`의 `allow-git=root`가 있어야 GitHub 설치가 허용됩니다.
+각 사이트 `package.json`의 dev 스크립트를 `jji-dev`로 감쌉니다.
 
-로컬에서 바로 확인하고 싶을 땐 사이트 폴더에서:
-
-```bash
-rm -rf node_modules/@jji/ui/dist && cp -R ../jji-ui/dist node_modules/@jji/ui/dist
+```json
+"dev": "jji-dev next dev",
+"ui:update": "npm uninstall @jji/ui && npm install github:JJI-dev/JJI-ui#semver:^0"
 ```
 
-(심볼릭 링크 `npm link`는 React가 두 벌 로드되어 오류가 날 수 있어 비추천)
+`npm run dev`로 켜두면 아래가 바뀔 때 dev 서버가 알아서 재시작됩니다.
+- `node_modules/@jji/ui` (공통 패키지 업데이트, `npm run sync`)
+- `package.json`, `package-lock.json`, `.env*`, `next.config.*`
+
+일반 소스(`src/`) 수정은 재시작 없이 Next가 바로 반영합니다.
+
+## 수정 → 반영 흐름
+
+### 로컬에서 바로 보기 (배포 전)
+이 레포(jji-ui)에서:
+```bash
+npm run dev      # 저장할 때마다 빌드 → 옆 폴더 사이트들에 복사 → 각 사이트 dev 서버 자동 재시작
+# 또는 한 번만: npm run sync
+```
+
+### 배포용으로 확정
+1. 이 레포에서 `package.json` 버전 올리기 → `npm run build`
+2. 커밋 (**dist 포함**) → `git tag v0.3.1 && git push && git push --tags`
+3. **각 사이트 폴더(ne, mo, space)에서** `npm run ui:update` → 최신 0.x 태그로 설치, lock 갱신
+4. 각 사이트 커밋·배포
+
+※ 사이트 `.npmrc`의 `allow-git=root`가 있어야 GitHub 설치가 허용됩니다 (npm 12+).
