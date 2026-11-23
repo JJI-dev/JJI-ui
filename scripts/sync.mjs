@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const SITES = ['ne-frontend', 'space-frontend', 'mo-frontend', 'JJI-frontend']
+const SITES = ['ne-frontend', 'space-frontend', 'mo-frontend', 'career-frontend', 'JJI-frontend']
 
 for (const site of SITES) {
   const target = path.resolve(root, '..', site, 'node_modules/@jji/ui')

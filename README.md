@@ -13,6 +13,7 @@ JJI 사이트 공통 UI 컴포넌트. 현재 사용처:
 |---|---|
 | `PostDetail` | 위 표 (글 상세) |
 | `CategoryGrid` + `GridTile` | ne `/work`, ne `/blog`, mo `/blog` (목록) |
+| `RevealScope` | ne `/work/[slug]`, mo `/work/[slug]`, career `/project/[slug]` (스크롤 등장 애니메이션) |
 
 ## 설치
 
@@ -74,6 +75,25 @@ import { CategoryGrid, GridTile, formatDate } from '@jji/ui'
   )}
 />
 ```
+
+## RevealScope (스크롤 등장 애니메이션)
+
+레이아웃은 사이트마다 자유롭게, 움직임만 공통으로 씁니다. 감싼 범위 안의 제목·문단·목록·이미지를 자동으로 찾아
+화면에 들어올 때 천천히 등장시킵니다 (글: 아래에서 올라오며 / 이미지: 가림막이 걷히며 확대→제자리, 순서대로 시간차).
+
+```tsx
+import { RevealScope } from '@jji/ui'
+
+<RevealScope extraSelector=".p">           {/* 사이트 전용 클래스 추가 가능 */}
+  <h1>제목</h1>                              {/* 자동 */}
+  <div data-reveal>메타 정보 박스</div>       {/* div 등은 직접 지정 */}
+  <div data-reveal="image">대표 이미지 박스</div>
+  <div data-reveal="none">움직이지 않을 영역</div>
+  {mdxContent}                               {/* MDX 내부도 자동, 기존 .reveal 클래스도 인식 */}
+</RevealScope>
+```
+
+속도 조정: `--jji-rv-duration`(글, 기본 1.4s), `--jji-rv-image-duration`(이미지, 1.8s), `--jji-rv-distance`(80px)
 
 ## WorkFeed (works.json 형식)
 

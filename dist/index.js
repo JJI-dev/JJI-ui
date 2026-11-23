@@ -319,9 +319,95 @@ function GridTile({ href, thumbnail, alt = "", metaLeft, metaRight, badge }) {
   }
   return /* @__PURE__ */ jsx2(Link2, { href, className: "jji-tile", children: inner });
 }
+
+// src/RevealScope.tsx
+import { createElement, useEffect as useEffect3, useRef as useRef3 } from "react";
+var DEFAULT_SELECTOR = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "p",
+  "ul",
+  "ol",
+  "blockquote",
+  "pre",
+  "table",
+  "img",
+  "video",
+  "picture",
+  "figure",
+  ".reveal",
+  "[data-reveal]"
+].join(", ");
+var IMAGE_TAGS = /* @__PURE__ */ new Set(["IMG", "VIDEO", "PICTURE", "FIGURE"]);
+function RevealScope({
+  children,
+  as = "div",
+  selector = DEFAULT_SELECTOR,
+  extraSelector,
+  stagger = 0.12,
+  ...rest
+}) {
+  const ref = useRef3(null);
+  useEffect3(() => {
+    const root = ref.current;
+    if (!root) return;
+    const sel = extraSelector ? `${selector}, ${extraSelector}` : selector;
+    const prepare = () => {
+      const candidates = Array.from(root.querySelectorAll(sel)).filter((el) => el.dataset.reveal !== "none" && !el.classList.contains("jji-rv"));
+      const set = new Set(candidates);
+      const targets = candidates.filter((el) => {
+        for (let p = el.parentElement; p && p !== root; p = p.parentElement) {
+          if (set.has(p) || p.classList.contains("jji-rv")) return false;
+        }
+        return true;
+      });
+      targets.forEach((el) => {
+        const isImage = el.dataset.reveal === "image" || IMAGE_TAGS.has(el.tagName);
+        el.classList.add("jji-rv", isImage ? "jji-rv--image" : "jji-rv--up");
+      });
+      return targets;
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        let order = 0;
+        entries.forEach((entry) => {
+          const el = entry.target;
+          if (entry.isIntersecting) {
+            el.style.transitionDelay = `${Math.min(order++ * stagger, 0.6)}s`;
+            el.classList.add("is-in");
+            io.unobserve(el);
+          } else if (entry.boundingClientRect.bottom < 0) {
+            el.classList.add("is-in");
+            io.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" }
+    );
+    prepare().forEach((el) => io.observe(el));
+    let raf = 0;
+    const mo = new MutationObserver(() => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        prepare().forEach((el) => io.observe(el));
+      });
+    });
+    mo.observe(root, { childList: true, subtree: true });
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [selector, extraSelector, stagger]);
+  return createElement(as, { ref, ...rest }, children);
+}
 export {
   CategoryGrid,
   GridTile,
   PostDetail,
+  RevealScope,
   formatDate
 };
