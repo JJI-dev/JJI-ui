@@ -33,10 +33,11 @@ export interface CategoryGridProps<T> {
   emptyText?: ReactNode
 }
 
+/* 돋보기 — 기존 ne Work의 작은 버전 (30px) */
 const SearchIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden>
-    <circle cx="21" cy="21" r="16" fill="white" stroke="currentColor" strokeWidth="3.5" />
-    <line x1="33" y1="33" x2="42" y2="42" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+  <svg width="30" height="30" viewBox="0 0 64 62" fill="none" aria-hidden>
+    <rect x="35.918" y="30" width="36" height="10.8473" rx="4" transform="rotate(39.6266 35.918 30)" fill="currentColor" />
+    <circle cx="29" cy="29" r="26" fill="white" stroke="currentColor" strokeWidth="6" />
   </svg>
 )
 

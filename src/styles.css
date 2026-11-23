@@ -158,7 +158,7 @@
    --jji-cg-active          활성 카테고리 색        (기본: --black)
    --jji-cg-grid-top        목록 시작 위치          (기본: clamp(360px, 40vh, 560px))
    --jji-cg-cat-top         카테고리 고정 위치      (기본: 헤더 높이 + 13vh)
-   --jji-cg-search-top      검색 버튼 고정 위치     (기본: 목록 시작 - 84px)
+   --jji-cg-search-top      검색 버튼 고정 위치     (기본: 목록 시작 - 62px)
    --jji-tile-ratio         타일 비율              (기본: 3 / 4)
 ============================================================== */
 
@@ -167,7 +167,7 @@
   --_px: var(--px, clamp(24px, 4vw, 48px));
   --_grid-top: var(--jji-cg-grid-top, clamp(360px, 40vh, 560px));
   --_cat-top: var(--jji-cg-cat-top, calc(var(--header-h, 80px) + clamp(24px, 13vh, 190px)));
-  --_search-top: var(--jji-cg-search-top, calc(var(--_grid-top) - 84px));
+  --_search-top: var(--jji-cg-search-top, calc(var(--_grid-top) - 62px));
   position: relative;
   min-height: 100vh;
 }

@@ -196,9 +196,9 @@ function PostDetail({
 import { useEffect as useEffect2, useMemo, useRef as useRef2, useState as useState2 } from "react";
 import Link2 from "next/link";
 import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
-var SearchIcon = () => /* @__PURE__ */ jsxs2("svg", { width: "48", height: "48", viewBox: "0 0 48 48", fill: "none", "aria-hidden": true, children: [
-  /* @__PURE__ */ jsx2("circle", { cx: "21", cy: "21", r: "16", fill: "white", stroke: "currentColor", strokeWidth: "3.5" }),
-  /* @__PURE__ */ jsx2("line", { x1: "33", y1: "33", x2: "42", y2: "42", stroke: "currentColor", strokeWidth: "4.5", strokeLinecap: "round" })
+var SearchIcon = () => /* @__PURE__ */ jsxs2("svg", { width: "30", height: "30", viewBox: "0 0 64 62", fill: "none", "aria-hidden": true, children: [
+  /* @__PURE__ */ jsx2("rect", { x: "35.918", y: "30", width: "36", height: "10.8473", rx: "4", transform: "rotate(39.6266 35.918 30)", fill: "currentColor" }),
+  /* @__PURE__ */ jsx2("circle", { cx: "29", cy: "29", r: "26", fill: "white", stroke: "currentColor", strokeWidth: "6" })
 ] });
 function CategoryGrid({
   categories,
@@ -367,7 +367,7 @@ function RevealScope({
         const isImage = el.dataset.reveal === "image" || IMAGE_TAGS.has(el.tagName);
         el.classList.add("jji-rv", isImage ? "jji-rv--image" : "jji-rv--up");
       });
-      return targets;
+      return Array.from(root.querySelectorAll(".jji-rv:not(.is-in)"));
     };
     const io = new IntersectionObserver(
       (entries) => {

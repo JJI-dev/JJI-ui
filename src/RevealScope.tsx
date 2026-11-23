@@ -64,7 +64,10 @@ export function RevealScope({
         const isImage = el.dataset.reveal === 'image' || IMAGE_TAGS.has(el.tagName)
         el.classList.add('jji-rv', isImage ? 'jji-rv--image' : 'jji-rv--up')
       })
-      return targets
+      // ⚠️ 새로 표시한 것만이 아니라 "아직 안 나타난 전부"를 감시
+      //    (StrictMode·Fast Refresh로 effect가 다시 돌 때, 이전에 표시만 되고
+      //     감시가 끊긴 요소가 투명한 채로 남는 문제 방지)
+      return Array.from(root.querySelectorAll<HTMLElement>('.jji-rv:not(.is-in)'))
     }
 
     const io = new IntersectionObserver(

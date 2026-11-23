@@ -46,8 +46,16 @@ let child = null
 let restarting = false
 const tag = '\x1b[35m[jji-dev]\x1b[0m'
 
+// 경로에 한글 등 비ASCII 문자가 있으면 (예: ~/Documents/코딩/...) macOS 파일 감시가 일부 변경(CSS 등)을
+// 놓치는 문제가 있어, webpack 감시를 폴링 방식으로 전환 (끄려면 WATCHPACK_POLLING=false)
+const env = { ...process.env }
+if (/[^\x00-\x7F]/.test(cwd) && env.WATCHPACK_POLLING === undefined) {
+  env.WATCHPACK_POLLING = 'true'
+  console.log(`${'\x1b[35m[jji-dev]\x1b[0m'} 경로에 비ASCII 문자 → 파일 감시 폴링 모드 (WATCHPACK_POLLING=true)`)
+}
+
 const start = () => {
-  child = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env: process.env, shell: process.platform === 'win32' })
+  child = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env, shell: process.platform === 'win32' })
   child.on('exit', code => {
     if (restarting) return
     process.exit(code ?? 0)
