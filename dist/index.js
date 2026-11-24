@@ -156,7 +156,7 @@ function PostDetail({
     /* @__PURE__ */ jsx("div", { className: "jji-pd-progress", children: /* @__PURE__ */ jsx("div", { className: "jji-pd-progress-bar", style: { width: `${progress}%` } }) }),
     /* @__PURE__ */ jsx("div", { className: `jji-pd-toast${toast.on ? " is-on" : ""}`, role: "status", children: toast.msg }),
     hero === "top" && /* @__PURE__ */ jsx("div", { className: "jji-pd-hero-top", children: post.thumbnail ? /* @__PURE__ */ jsx("img", { src: post.thumbnail, alt: post.title }) : /* @__PURE__ */ jsx("div", { className: "jji-pd-hero-placeholder" }) }),
-    cover && /* @__PURE__ */ jsx(
+    cover && /* @__PURE__ */ jsxs(
       "div",
       {
         className: "jji-pd-cover",
@@ -164,7 +164,7 @@ function PostDetail({
           ...post.color ? { "--jji-pd-cover-bg": post.color } : {},
           ...post.textColor || readableOn(post.color) ? { "--jji-pd-cover-fg": post.textColor || readableOn(post.color) } : {}
         },
-        children: /* @__PURE__ */ jsxs("div", { className: "jji-pd-cover-inner", children: [
+        children: [
           post.category && /* @__PURE__ */ jsxs("p", { className: `jji-pd-cover-category ${REVEAL}`, children: [
             "(",
             post.category,
@@ -176,7 +176,7 @@ function PostDetail({
             date && metaExtra && /* @__PURE__ */ jsx("span", { "aria-hidden": true, children: "\xB7" }),
             metaExtra
           ] })
-        ] })
+        ]
       }
     ),
     /* @__PURE__ */ jsx("div", { className: hero === "top" ? "jji-pd-body jji-pd-body--over-hero" : "jji-pd-body", children: /* @__PURE__ */ jsxs("div", { className: "jji-pd-wrap", children: [

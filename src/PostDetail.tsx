@@ -258,17 +258,15 @@ export function PostDetail({
             ...((post.textColor || readableOn(post.color)) ? { '--jji-pd-cover-fg': post.textColor || readableOn(post.color) } : {}),
           } as CSSProperties}
         >
-          <div className="jji-pd-cover-inner">
-            {post.category && <p className={`jji-pd-cover-category ${REVEAL}`}>({post.category})</p>}
-            <h1 className={`jji-pd-cover-title ${REVEAL}`}>{post.title}</h1>
-            {(date || metaExtra) && (
-              <div className={`jji-pd-cover-meta ${REVEAL}`}>
-                {date && <span>{date}</span>}
-                {date && metaExtra && <span aria-hidden>·</span>}
-                {metaExtra}
-              </div>
-            )}
-          </div>
+          {post.category && <p className={`jji-pd-cover-category ${REVEAL}`}>({post.category})</p>}
+          <h1 className={`jji-pd-cover-title ${REVEAL}`}>{post.title}</h1>
+          {(date || metaExtra) && (
+            <div className={`jji-pd-cover-meta ${REVEAL}`}>
+              {date && <span>{date}</span>}
+              {date && metaExtra && <span aria-hidden>·</span>}
+              {metaExtra}
+            </div>
+          )}
         </div>
       )}
 
