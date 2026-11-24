@@ -129,7 +129,7 @@
    --jji-pd-cover-bg        기본 배경색 (글 데이터 color가 있으면 그것)
    --jji-pd-cover-fg        글자색 (기본: 배경 밝기로 자동)
    --jji-pd-cover-offset    사이트 main의 상단 여백만큼 위로 당겨 헤더 뒤까지 채움 (예: 60px)
-   --jji-pd-cover-px        좌우 여백 (기본: 사이트 --px)
+   --jji-pd-cover-px        좌우 여백 (기본: clamp(24px, 9vw, 160px))
    --jji-pd-cover-title-font 제목 폰트 */
 .jji-pd-cover {
   position: relative;
@@ -138,8 +138,8 @@
   margin-top: calc(-1 * var(--jji-pd-cover-offset, 0px));
   padding: calc(var(--_header-h) + clamp(56px, 8vw, 120px)) 0 clamp(56px, 7vw, 104px);
   min-height: clamp(360px, 34vw, 520px);
-  padding-left: var(--jji-pd-cover-px, var(--_px));
-  padding-right: var(--jji-pd-cover-px, var(--_px));
+  padding-left: var(--jji-pd-cover-px, clamp(24px, 9vw, 160px));
+  padding-right: var(--jji-pd-cover-px, clamp(24px, 9vw, 160px));
   display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start;
   box-sizing: border-box;
 }
