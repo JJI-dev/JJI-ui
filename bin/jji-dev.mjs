@@ -42,8 +42,6 @@ const signature = () => {
   return parts.join('|')
 }
 
-let child = null
-let restarting = false
 const tag = '\x1b[35m[jji-dev]\x1b[0m'
 
 // 경로에 한글 등 비ASCII 문자가 있으면 (예: ~/Documents/코딩/...) macOS 파일 감시가 일부 변경(CSS 등)을
@@ -56,40 +54,54 @@ if (/[^\x00-\x7F]/.test(cwd) && env.WATCHPACK_POLLING === undefined) {
 
 const isWin = process.platform === 'win32'
 // next dev는 실제 서버를 자식 프로세스로 따로 띄움 → 프로세스 그룹 전체를 종료해야 포트가 풀림
-const killTree = sig => {
-  if (!child?.pid) return
-  try { isWin ? child.kill(sig) : process.kill(-child.pid, sig) } catch {}
+const killTree = (proc, sig) => {
+  if (!proc?.pid) return
+  try { isWin ? proc.kill(sig) : process.kill(-proc.pid, sig) } catch {}
 }
 
+// 서버는 항상 하나만: child가 살아 있으면 새로 띄우지 않음
+let child = null
+let stopping = false      // jji-dev 자체 종료 중
+let wantRestart = false   // 현재 서버가 꺼지면 다시 띄울지
 let retries = 0
 let startedAt = 0
-const start = () => {
+let timer = null
+
+const schedule = ms => { clearTimeout(timer); timer = setTimeout(start, ms) }
+
+function start() {
+  timer = null
+  if (child || stopping) return
   startedAt = Date.now()
-  child = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env, shell: isWin, detached: !isWin })
-  child.on('exit', code => {
-    if (restarting) return
-    // 재시작 직후 실패(이전 서버가 포트를 아직 안 놓음 등) → 잠시 후 재시도
-    if (code && retries > 0 && Date.now() - startedAt < 15000) {
+  const proc = spawn(cmd[0], cmd.slice(1), { stdio: 'inherit', env, shell: isWin, detached: !isWin })
+  child = proc
+  proc.on('exit', code => {
+    if (child === proc) child = null
+    if (stopping) return
+    if (wantRestart) {            // 의도한 재시작 → 포트가 풀릴 시간을 잠깐 주고 다시 시작
+      wantRestart = false
+      retries = 3
+      return schedule(800)
+    }
+    if (code && retries > 0 && Date.now() - startedAt < 15000) {   // 재시작 직후 실패(포트 충돌 등) → 재시도
       retries--
       console.log(`\n${tag} 시작 실패 → 잠시 후 다시 시도\n`)
-      setTimeout(start, 1500)
-      return
+      return schedule(1500)
     }
     process.exit(code ?? 0)
   })
 }
 
 const restart = reason => {
-  if (!child) return start()
-  restarting = true
   console.log(`\n${tag} ${reason} → dev 서버 재시작\n`)
-  const prev = child
-  prev.once('exit', () => {
-    // 손자 프로세스가 포트를 놓을 시간을 잠깐 줌
-    setTimeout(() => { restarting = false; retries = 3; start() }, 800)
-  })
-  killTree('SIGTERM')
-  setTimeout(() => { if (restarting && child === prev) killTree('SIGKILL') }, 5000)
+  if (!child) {                   // 이미 꺼져 있음(재시작 대기 중) → 일정만 다시 잡기
+    retries = 3
+    return schedule(800)
+  }
+  wantRestart = true
+  const proc = child
+  killTree(proc, 'SIGTERM')
+  setTimeout(() => { if (child === proc) killTree(proc, 'SIGKILL') }, 5000)
 }
 
 let last = signature()
@@ -108,8 +120,10 @@ setInterval(() => {
 }, 1000)
 
 for (const sig of ['SIGINT', 'SIGTERM']) {
-  process.on(sig, () => { restarting = true; killTree(sig); process.exit(0) })
+  process.on(sig, () => { stopping = true; killTree(child, sig); process.exit(0) })
 }
 
 console.log(`${tag} 자동 재시작 감시 중 (@jji/ui, package.json, .env, next.config)`)
 start()
+
+process.on('exit', () => { stopping = true; killTree(child, 'SIGTERM') })
